@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RescueRelay Volunteer Portal</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  background: #f3f7f4;
+  color: #183c30;
+}
+
+button, input {
+  font: inherit;
+}
+
+button {
+  background: #16804a;
+  color: white;
+  padding: 12px 18px;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #10683b;
+}
+
+button:disabled {
+  background: #888;
+  cursor: not-allowed;
+}
+
+/* PAGE 1: LOGIN */
+#loginPage {
+  max-width: 420px;
+  margin: 55px auto;
+  padding: 30px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 25px #00000012;
+}
+
+#loginPage h1 {
+  color: #16804a;
+}
+
+#loginPage label {
+  display: block;
+  margin: 15px 0 7px;
+  font-weight: bold;
+}
+
+#loginPage input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #cbd5ce;
+  border-radius: 8px;
+}
+
+#loginButton {
+  width: 100%;
+  margin-top: 20px;
+}
+
+.demo-info {
+  margin-top: 20px;
+  padding: 12px;
+  background: #eef8f0;
+  border-radius: 8px;
+  overflow-wrap: anywhere;
+}
+
+#errorMessage {
+  color: #c62828;
+}
+
+/* PAGE 2: DASHBOARD */
+#dashboardPage {
+  display: none;
+  max-width: 1000px;
+  margin: 20px auto;
+}
+
+.header {
+  background: #174d3b;
+  color: white;
+  padding: 24px;
+  border-radius: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.header h1 {
+  margin-top: 0;
+}
+
+#logoutButton {
+  background: #a52a2a;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin: 20px 0;
+}
+
+.card, .donation {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 15px;
+  box-shadow: 0 3px 12px #00000008;
+}
+
+.stat-number {
+  font-size: 28px;
+  font-weight: bold;
+  color: #16804a;
+  margin-bottom: 0;
+}
+
+.donation {
+  border-left: 5px solid #16804a;
+}
+
+.donation button {
+  margin: 5px 5px 5px 0;
+}
+
+.donation-status {
+  font-weight: bold;
+  color: #16804a;
+}
+
+@media (max-width: 600px) {
+  .stats {
+    grid-template-columns: 1fr;
+  }
+
+  body {
+    padding: 12px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<!-- PAGE 1: VOLUNTEER LOGIN -->
+<section id="loginPage">
+  <h1>RescueRelay</h1>
+  <p>Rescue food, deliver hope.</p>
+  <h2>Volunteer Login</h2>
+
+  <form id="loginForm">
+    <label for="loginId">Volunteer Login ID</label>
+    <input
+      id="loginId"
+      type="text"
+      placeholder="Enter your login ID"
+      autocomplete="username"
+      required
+    >
+
+    <label for="loginPassword">Password</label>
+    <input
+      id="loginPassword"
+      type="password"
+      placeholder="Enter your password"
+      autocomplete="current-password"
+      required
+    >
+
+    <button id="loginButton" type="submit">Login</button>
+    <p id="errorMessage" role="alert"></p>
+  </form>
+
+  <div class="demo-info">
+    <strong>Hackathon Demo Login</strong>
+    <p>Login ID: VOLUNTEER01</p>
+    <p>Password: Rescue123</p>
+  </div>
+</section>
+
+
+<!-- PAGE 2: VOLUNTEER DASHBOARD -->
+<main id="dashboardPage">
+
+  <header class="header">
+    <div>
+      <h1>RescueRelay</h1>
+      <p>Volunteer Dashboard</p>
+      <p>Welcome, <span id="welcomeName">Volunteer</span>!</p>
+    </div>
+
+    <button id="logoutButton" type="button">Logout</button>
+  </header>
+
+  <section class="stats">
+    <div class="card">
+      Available Donations
+      <p class="stat-number" id="availableCount">2</p>
+    </div>
+
+    <div class="card">
+      My Pickups
+      <p class="stat-number" id="pickupCount">0</p>
+    </div>
+
+    <div class="card">
+      Delivered
+      <p class="stat-number" id="deliveredCount">0</p>
+    </div>
+  </section>
+
+  <h2>Available Food Donations</h2>
+  <p>Review the food details and accept a donation for delivery.</p>
+
+  <section id="donationList">
+
+    <article class="donation" data-id="101" data-state="available">
+      <h3>RR-101 — Hotel Green Leaf</h3>
+      <p>Food: Vegetarian meals</p>
+      <p>Quantity: 20 portions</p>
+      <p>Pickup location: Bengaluru</p>
+      <p>Recipient: Hope Community Kitchen</p>
+      <p class="donation-status">Status: Available</p>
+      <button type="button" class="acceptButton">Accept Donation</button>
+      <button type="button" class="deliverButton" hidden>
+        Mark as Delivered
+      </button>
+    </article>
+
+    <article class="donation" data-id="102" data-state="available">
+      <h3>RR-102 — Community Kitchen</h3>
+      <p>Food: Rice and curry</p>
+      <p>Quantity: 30 portions</p>
+      <p>Pickup location: Bengaluru</p>
+      <p>Recipient: Helping Hands Shelter</p>
+      <p class="donation-status">Status: Available</p>
+      <button type="button" class="acceptButton">Accept Donation</button>
+      <button type="button" class="deliverButton" hidden>
+        Mark as Delivered
+      </button>
+    </article>
+
+  </section>
+
+  <section class="card">
+    <h2>My Activity</h2>
+    <p id="activityMessage">You have not accepted any donations yet.</p>
+  </section>
+
+</main>
+
+<script>
+const loginPage = document.getElementById("loginPage");
+const dashboardPage = document.getElementById("dashboardPage");
+const loginForm = document.getElementById("loginForm");
+const errorMessage = document.getElementById("errorMessage");
+
+const DEMO_ID = "VOLUNTEER01";
+const DEMO_PASSWORD = "Rescue123";
+
+let volunteerName = "Volunteer";
+let acceptedCount = 0;
+let deliveredCount = 0;
+
+function showLogin() {
+  dashboardPage.style.display = "none";
+  loginPage.style.display = "block";
+}
+
+function showDashboard() {
+  loginPage.style.display = "none";
+  dashboardPage.style.display = "block";
+  document.getElementById("welcomeName").textContent = volunteerName;
+}
+
+loginForm.addEventListener("submit", function(event) {
+  event.preventDefault();
+
+  const id = document.getElementById("loginId").value.trim();
+  const password = document.getElementById("loginPassword").value;
+
+  if (id === DEMO_ID && password === DEMO_PASSWORD) {
+    volunteerName = "Volunteer 01";
+    errorMessage.textContent = "";
+
+    // Demo-only session indicator.
+    sessionStorage.setItem("rescueRelayLoggedIn", "true");
+    showDashboard();
+  } else {
+    errorMessage.textContent =
+      "Incorrect Login ID or password. Please try again.";
+  }
+});
+
+document.querySelectorAll(".donation").forEach(function(donation) {
+  const status = donation.querySelector(".donation-status");
+  const acceptButton = donation.querySelector(".acceptButton");
+  const deliverButton = donation.querySelector(".deliverButton");
+
+  acceptButton.addEventListener("click", function() {
+    if (donation.dataset.state !== "available") return;
+
+    donation.dataset.state = "accepted";
+    acceptedCount++;
+
+    status.textContent = "Status: Accepted by you";
+    acceptButton.hidden = true;
+    deliverButton.hidden = false;
+
+    updateStats();
+    document.getElementById("activityMessage").textContent =
+      "You have accepted donation RR-" + donation.dataset.id + ".";
+  });
+
+  deliverButton.addEventListener("click", function() {
+    if (donation.dataset.state !== "accepted") return;
+
+    donation.dataset.state = "delivered";
+    deliveredCount++;
+
+    status.textContent = "Status: Delivered";
+    deliverButton.disabled = true;
+    deliverButton.textContent = "Delivery Completed";
+
+    updateStats();
+    document.getElementById("activityMessage").textContent =
+      "Donation RR-" + donation.dataset.id + " was marked delivered.";
+  });
+});
+
+function updateStats() {
+  document.getElementById("availableCount").textContent =
+    document.querySelectorAll('.donation[data-state="available"]').length;
+
+  document.getElementById("pickupCount").textContent = acceptedCount;
+  document.getElementById("deliveredCount").textContent = deliveredCount;
+}
+
+document.getElementById("logoutButton").addEventListener("click", function() {
+  sessionStorage.removeItem("rescueRelayLoggedIn");
+  loginForm.reset();
+  errorMessage.textContent = "";
+  showLogin();
+});
+
+// Always start on the login page when the website is opened.
+showLogin();
+</script>
+
+</body>
+</html>

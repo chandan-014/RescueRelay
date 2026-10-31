@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RescueRelay | Volunteer Portal</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f1f6f8;color:#173047}
+header{background:#10243a;color:white;padding:20px}
+header h1{margin:0}
+header span{color:#54dfbd}
+nav{display:flex;gap:8px;flex-wrap:wrap;background:white;padding:12px}
+nav button,.btn{border:0;border-radius:8px;padding:11px 15px;
+background:#0b9f8e;color:white;font-weight:bold;cursor:pointer}
+nav button:hover,.btn:hover{background:#08796e}
+main{max-width:1000px;margin:24px auto;padding:0 15px}
+section{background:white;padding:20px;border-radius:14px;
+margin-bottom:18px;box-shadow:0 4px 15px #0000000a}
+h2{color:#10243a;margin-top:0}
+label{display:block;font-weight:bold;font-size:13px;margin:12px 0 6px}
+input,select{width:100%;padding:11px;border:1px solid #cbd8df;
+border-radius:8px;font-size:15px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.order{border:1px solid #dce6eb;padding:15px;border-radius:10px;margin:10px 0}
+.order p{color:#637785;font-size:14px;line-height:1.5}
+.tag{display:inline-block;background:#e5faf4;color:#08796e;
+padding:5px 9px;border-radius:20px;font-size:12px;font-weight:bold}
+.money{font-size:34px;font-weight:bold;color:#10243a;margin:10px 0}
+.summary{background:#e8fbf6;padding:15px;border-radius:10px;margin-top:15px}
+.row{display:flex;justify-content:space-between;gap:12px;padding:7px 0}
+#qr{display:flex;justify-content:center;align-items:center;
+padding:18px;min-height:220px;border:1px dashed #cbd8df;border-radius:10px;margin:12px 0}
+#qr img,#qr canvas{max-width:100%;height:auto!important}
+.hidden{display:none}
+.note{background:#fff5dc;color:#735317;padding:12px;border-radius:9px;
+font-size:12px;line-height:1.5}
+.status{font-size:13px;color:#08796e;margin-top:10px}
+@media(max-width:650px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>♻ Rescue<span>Relay</span></h1>
+  <p>Volunteer & Delivery Partner Portal</p>
+</header>
+
+<nav>
+  <button onclick="showPage('profile')">Volunteer Login</button>
+  <button onclick="showPage('orders')">Available Orders</button>
+  <button onclick="showPage('payment')">Payments & QR</button>
+</nav>
+
+<main>
+
+<!-- VOLUNTEER LOGIN AND DETAILS -->
+<section id="profile">
+  <h2>Volunteer Login & Details</h2>
+  <div class="grid">
+    <div>
+      <label for="volName">Volunteer Full Name</label>
+      <input id="volName" placeholder="Enter your name">
+    </div>
+    <div>
+      <label for="volId">Volunteer Login ID</label>
+      <input id="volId" placeholder="Example: VOL-001">
+    </div>
+    <div>
+      <label for="phone">Phone Number</label>
+      <input id="phone" type="tel" placeholder="Enter phone number">
+    </div>
+    <div>
+      <label for="vehicle">Delivery Mode</label>
+      <select id="vehicle">
+        <option>Walking</option>
+        <option>Bicycle</option>
+        <option>Two-wheeler</option>
+        <option>Car</option>
+      </select>
+    </div>
+    <div>
+      <label for="upiProfile">UPI ID for Receiving Payment</label>
+      <input id="upiProfile" placeholder="yourname@bank">
+    </div>
+    <div>
+      <label for="availability">Availability</label>
+      <select id="availability">
+        <option>Available</option>
+        <option>Unavailable</option>
+      </select>
+    </div>
+  </div>
+  <button class="btn" onclick="saveProfile()">Save Volunteer Details</button>
+  <p id="profileStatus" class="status"></p>
+  <p style="font-size:12px;color:#637785">
+    Demo login only. This page does not provide secure account authentication.
+  </p>
+</section>
+
+<!-- AVAILABLE ORDERS -->
+<section id="orders" class="hidden">
+  <h2>Available Food Orders</h2>
+  <p style="color:#637785">Review a donation and accept it for collection and delivery.</p>
+  <div id="orderList"></div>
+  <button class="btn" onclick="addDemoOrder()">Add Demo Donation</button>
+</section>
+
+<!-- PAYMENT AND QR -->
+<section id="payment" class="hidden">
+  <h2>Delivery Payment Details</h2>
+  <div class="grid">
+    <div>
+      <label for="paymentOrder">Accepted Order</label>
+      <select id="paymentOrder" onchange="selectOrder()">
+        <option value="">Select an accepted order</option>
+      </select>
+    </div>
+    <div>
+      <label for="receiver">Volunteer / Receiver Name</label>
+      <input id="receiver" placeholder="Volunteer name">
+    </div>
+    <div>
+      <label for="distance">Delivery Distance (km)</label>
+      <input id="distance" type="number" min="0" step="0.1" value="5"
+             oninput="calculate()">
+    </div>
+    <div>
+      <label for="rate">Payment Rate per km (₹)</label>
+      <input id="rate" type="number" min="0" value="10"
+             oninput="calculate()">
+    </div>
+    <div>
+      <label for="allowance">Fixed Allowance (₹)</label>
+      <input id="allowance" type="number" min="0" value="20"
+             oninput="calculate()">
+    </div>
+    <div>
+      <label for="upi">Receiver UPI ID</label>
+      <input id="upi" placeholder="yourname@bank">
+    </div>
+  </div>
+
+  <div class="summary">
+    <div>Estimated Volunteer Payout</div>
+    <div class="money" id="total">₹70.00</div>
+    <div class="row"><span>Distance fee</span><b id="fee">₹50.00</b></div>
+    <div class="row"><span>Fixed allowance</span><b id="extra">₹20.00</b></div>
+    <div class="row"><span>Trip distance</span><b id="km">5 km</b></div>
+  </div>
+
+  <button class="btn" onclick="generateQR()">Generate UPI QR Code</button>
+
+  <h3>Scan to Pay</h3>
+  <div id="qr">Enter a UPI ID and generate the QR code.</div>
+  <p id="qrInfo" class="status"></p>
+
+  <button class="btn" onclick="markPaid()">Mark Payment as Paid (Demo)</button>
+  <p id="paymentStatus" class="status"></p>
+
+  <div class="note">
+    IMPORTANT: The QR code creates a UPI payment request. It does not transfer
+    money or confirm payment. Verify any real payment in your UPI app.
+    This page is a demo, not a payment gateway.
+  </div>
+</section>
+
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+const KEY = "rescuerelay_volunteer_demo_v1";
+let data = JSON.parse(localStorage.getItem(KEY) || '{"profile":{},"orders":[]}');
+
+function saveData(){
+  localStorage.setItem(KEY, JSON.stringify(data));
+}
+
+function showPage(id){
+  ["profile","orders","payment"].forEach(page=>{
+    document.getElementById(page).classList.toggle("hidden",page!==id);
+  });
+  if(id==="orders") renderOrders();
+  if(id==="payment") refreshOrderOptions();
+}
+
+function saveProfile(){
+  data.profile = {
+    name: document.getElementById("volName").value.trim(),
+    id: document.getElementById("volId").value.trim(),
+    phone: document.getElementById("phone").value.trim(),
+    vehicle: document.getElementById("vehicle").value,
+    upi: document.getElementById("upiProfile").value.trim(),
+    availability: document.getElementById("availability").value
+  };
+  if(!data.profile.name || !data.profile.id){
+    document.getElementById("profileStatus").textContent =
+      "Please enter volunteer name and login ID.";
+    return;
+  }
+  saveData();
+  document.getElementById("receiver").value=data.profile.name;
+  document.getElementById("upi").value=data.profile.upi;
+  document.getElementById("profileStatus").textContent =
+    "Volunteer details saved successfully.";
+}
+
+function addDemoOrder(){
+  data.orders.push({
+    id:"RR-"+Date.now().toString().slice(-6),
+    food:"Vegetarian meals",
+    portions:20,
+    pickup:"Hope Community Kitchen, Bengaluru (demo)",
+    status:"Available",
+    volunteerId:""
+  });
+  saveData();
+  renderOrders();
+}
+
+function renderOrders(){
+  const list=document.getElementById("orderList");
+  if(!data.orders.length){
+    list.innerHTML="<p>No orders yet. Click Add Demo Donation to test.</p>";
+    return;
+  }
+  list.innerHTML=data.orders.map(o=>`
+    <div class="order">
+      <h3>${escapeHTML(o.food)} — ${o.portions} portions</h3>
+      <span class="tag">${escapeHTML(o.status)}</span>
+      <p>Order ID: ${escapeHTML(o.id)}<br>
+      Pickup: ${escapeHTML(o.pickup)}</p>
+      ${o.status==="Available"
+        ? `<button class="btn" onclick="acceptOrder('${o.id}')">Accept Order</button>`
+        : `<p>Volunteer: ${escapeHTML(o.volunteerName||"Not assigned")}</p>
+           ${o.status==="Accepted"
+             ? `<button class="btn" onclick="openPayment('${o.id}')">Open Payment Details</button>
+                <button class="btn" onclick="completeOrder('${o.id}')">Mark Delivered</button>`
+             : `<span class="tag">Delivery completed</span>`}`}
+    </div>`).join("");
+}
+
+function acceptOrder(id){
+  const o=data.orders.find(x=>x.id===id);
+  if(!o || o.status!=="Available") return;
+  const p=data.profile;
+  if(!p.name || !p.id){
+    alert("Please save your volunteer name and login ID first.");
+    showPage("profile");
+    return;
+  }
+  if(p.availability==="Unavailable"){
+    alert("Please set your availability to Available.");
+    return;
+  }
+  o.status="Accepted";
+  o.volunteerId=p.id;
+  o.volunteerName=p.name;
+  saveData();
+  renderOrders();
+  refreshOrderOptions();
+}
+
+function completeOrder(id){
+  const o=data.orders.find(x=>x.id===id);
+  if(o){o.status="Completed";saveData();renderOrders();refreshOrderOptions();}
+}
+
+function refreshOrderOptions(){
+  const select=document.getElementById("paymentOrder");
+  const previous=select.value;
+  select.innerHTML='<option value="">Select an accepted order</option>';
+  data.orders.filter(o=>o.status==="Accepted" &&
+    o.volunteerId===((data.profile||{}).id||"")).forEach(o=>{
+      const option=document.createElement("option");
+      option.value=o.id;
+      option.textContent=o.id+" — "+o.food;
+      select.appendChild(option);
+    });
+  if([...select.options].some(x=>x.value===previous)) select.value=previous;
+}
+
+function openPayment(id){
+  showPage("payment");
+  document.getElementById("paymentOrder").value=id;
+  selectOrder();
+}
+
+function selectOrder(){
+  const o=data.orders.find(x=>x.id===document.getElementById("paymentOrder").value);
+  if(!o)return;
+  document.getElementById("receiver").value=o.volunteerName||data.profile.name||"";
+  document.getElementById("upi").value=data.profile.upi||"";
+  calculate();
+}
+
+function calculate(){
+  const distance=Math.max(0,Number(document.getElementById("distance").value)||0);
+  const rate=Math.max(0,Number(document.getElementById("rate").value)||0);
+  const allowance=Math.max(0,Number(document.getElementById("allowance").value)||0);
+  const fee=Math.round(distance*rate*100)/100;
+  const total=Math.round((fee+allowance)*100)/100;
+  const money=n=>"₹"+n.toFixed(2);
+  document.getElementById("fee").textContent=money(fee);
+  document.getElementById("extra").textContent=money(allowance);
+  document.getElementById("km").textContent=distance+" km";
+  document.getElementById("total").textContent=money(total);
+  return {distance,rate,allowance,fee,total};
+}
+
+function generateQR(){
+  const upi=document.getElementById("upi").value.trim();
+  const receiver=document.getElementById("receiver").value.trim()||"RescueRelay Volunteer";
+  const order=document.getElementById("paymentOrder").value||"RR-DEMO";
+  const box=document.getElementById("qr");
+  box.innerHTML="";
+  if(!/^[\w.-]{2,256}@[A-Za-z]{2,64}$/.test(upi)){
+    box.textContent="Please enter a valid receiver UPI ID first.";
+    document.getElementById("qrInfo").textContent="";
+    return;
+  }
+  if(typeof QRCode==="undefined"){
+    box.textContent="QR library could not load. Check your internet connection.";
+    return;
+  }
+  const p=calculate();
+  const params=new URLSearchParams({
+    pa:upi,pn:receiver,am:p.total.toFixed(2),cu:"INR",
+    tn:"RescueRelay delivery "+order
+  });
+  const payload="upi://pay?"+params.toString();
+  new QRCode(box,{text:payload,width:190,height:190});
+  document.getElementById("qrInfo").textContent=
+    "Receiver: "+upi+" | Amount: ₹"+p.total.toFixed(2);
+}
+
+function markPaid(){
+  const id=document.getElementById("paymentOrder").value;
+  const o=data.orders.find(x=>x.id===id);
+  if(!o){
+    document.getElementById("paymentStatus").textContent=
+      "Select an accepted order first. This is demo-only.";
+    return;
+  }
+  o.paymentStatus="Marked paid (demo only)";
+  o.payout=calculate().total;
+  saveData();
+  document.getElementById("paymentStatus").textContent=
+    "Marked as paid for the demo only. No payment was transferred or verified.";
+}
+
+function escapeHTML(value){
+  return String(value??"").replace(/[&<>"']/g,c=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[c]));
+}
+
+if(data.profile){
+  document.getElementById("volName").value=data.profile.name||"";
+  document.getElementById("volId").value=data.profile.id||"";
+  document.getElementById("phone").value=data.profile.phone||"";
+  document.getElementById("vehicle").value=data.profile.vehicle||"Walking";
+  document.getElementById("upiProfile").value=data.profile.upi||"";
+  document.getElementById("availability").value=data.profile.availability||"Available";
+  document.getElementById("receiver").value=data.profile.name||"";
+  document.getElementById("upi").value=data.profile.upi||"";
+}
+renderOrders();
+calculate();
+</script>
+</body>
+</html>
